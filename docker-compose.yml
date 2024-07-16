@@ -1,0 +1,87 @@
+version: '3.9'
+services:
+
+
+  # prometheus:
+  #   image: slotix/dbs-prometheus:latest
+  #   container_name: prom
+  #   user: root
+  #   ports:
+  #     - 9090:9090
+  #   # command:
+  #     # - --config.file=/etc/prometheus/prometheus.yml
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus/
+  #   #   - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #     - ../_storage/prometheus:/prometheus
+
+
+  mysql:
+    image: mysql:8.3.0
+    container_name: mysql
+    build: ./mysql
+    profiles:
+      - mysql
+    # NOTE: use of "mysql_native_password" is not recommended: 
+    # https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./_storage/mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - '3306:3306'
+
+
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    command: postgres
+    profiles:
+      - postgres
+    volumes:
+      - ./_storage/postgres-data:/var/lib/postgresql/data
+      # - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - '5432:5432'
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+       - 8080:8080
+
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4:latest
+  #   #restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: postgres@dbconvert.com
+  #     PGADMIN_DEFAULT_PASSWORD: postgres
+  #   depends_on:
+  #     - postgres
+  #   # volumes: 
+  #     # !!!! sudo chown -R 5050:5050 <host_directory>
+  #     # !!!! sudo chown 5050:5050 client.key client.crt ca.crt
+  #     # - ../_storage/pgadmin:/var/lib/pgadmin
+  #   ports:
+  #     - "5050:80"
+  #   network_mode: host
+
+
+  # nats:
+  #   container_name: nats
+  #   image: nats
+  #   entrypoint: /nats-server
+  #   command: "--jetstream -m 8222 --store_dir /data/nats-server"
+  #   ports:
+  #     - 4222:4222
+  #     - 8222:8222
+    # volumes:
+      # - ../_storage/nats:/data/nats-server/jetstream

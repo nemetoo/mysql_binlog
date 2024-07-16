@@ -1,0 +1,45 @@
+[mysqld]
+secure-file-priv=""
+# ----------------------------------------------
+# Enable the binlog for replication & CDC
+# ----------------------------------------------
+#
+server_id                       = 1
+bind-address                    = 0.0.0.0
+max_connections                 = 250
+
+skip-name-resolve
+skip-external-locking
+
+log_bin                         = mysql-bin
+binlog_format			= row
+binlog_row_image                = full
+binlog_row_metadata             = full
+binlog_row_event_max_size       = 16384
+binlog_expire_logs_seconds      = 2592000
+binlog_checksum                 = NONE
+binlog_cache_size               = 100M 
+gtid_mode                       = ON
+enforce_gtid_consistency        = ON
+
+log_slave_updates               = ON
+sync_binlog			= 1
+innodb_flush_log_at_trx_commit	= 1
+innodb_file_per_table           = ON
+innodb_buffer_pool_size         = 512M
+innodb_fast_shutdown            = 0
+innodb_flush_log_at_trx_commit  = 1
+# innodb_log_file_size            = ???
+
+innodb_stats_on_metadata        = 0
+
+# enforce-gtid-consistency and gtid-mode only takes effect if binary logging takes place for a statement.
+# No need to switch it ON for row based log.
+#replica_parallel_workers=10
+#binlog_stmt_cache_size=65536
+#binlog_cache_size=65536
+#rpl_read_size=16384
+
+# Require clients to connect either using SSL
+# or through a local socket file
+# require_secure_transport = ON
