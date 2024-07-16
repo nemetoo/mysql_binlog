@@ -4,7 +4,7 @@
 > [official doc](https://dev.mysql.com/doc/refman/8.3/en/mysql-shell-tutorial-python-download.html)
 
 ```bash
-wget https://dbconvert.com/downloads/dbs/sample-data/products.csv --output-document ./source/mysql/products.csv
+wget https://dbconvert.com/downloads/dbs/sample-data/products.csv --output-document ./mysql/products.csv
 ```
 
 ## Populate source table with sample data.
