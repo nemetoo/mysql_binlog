@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+# Export for tr error in mac
+export LC_ALL=C
+export LC_CTYPE=C
+
+CPU_ARCH=$(uname -m)
+OS_NAME=$(uname)
+
+SED_PREFIX=()
+if [ "$OS_NAME" == "Darwin" ]; then
+  SED_PREFIX=("-i" "")
+else
+  SED_PREFIX=("-i")
+fi
+
+user_info() {
+    # Вывод информации о текущем пользователе
+    echo "Текущий пользователь: $USER"
+
+    # Вывод имени хоста
+    echo "Имя хоста: $(hostname)"
+
+    # Определение и вывод информации о версии ОС
+    if [[ -f /etc/os-release ]]; then
+        . /etc/os-release
+        echo "Операционная система: $PRETTY_NAME"
+    else
+        echo "Информация о версии ОС недоступна"
+    fi
+
+    # Вывод текущей версии ядра
+    echo "Версия ядра: $(uname -r)"
+}
+
+home_dir_info() {
+    ls -la $HOME
+}
+
+create_dir() {
+    # Запрашиваем у пользователя путь к файлу
+    read -p "Введите путь к файлу (с именем файла): " filepath
+
+    # Запрашиваем у пользователя права доступа
+    read -p "Введите права доступа в формате (например, 644): " permissions
+
+    # Получаем директорию из пути
+    directory=$(dirname "$filepath")
+
+    # Проверяем, существует ли директория
+    if [ ! -d "$directory" ]; then
+    echo "Директория $directory не существует. Создаю..."
+    mkdir -p "$directory"
+    if [ $? -ne 0 ]; then
+        echo "Не удалось создать директорию $directory."
+        exit 1
+    fi
+    fi
+
+    # Создаем файл
+    touch "$filepath"
+    if [ $? -ne 0 ]; then
+    echo "Не удалось создать файл $filepath."
+    exit 1
+    fi
+
+    # Устанавливаем права доступа
+    chmod "$permissions" "$filepath"
+    if [ $? -ne 0 ]; then
+    echo "Не удалось установить права $permissions для файла $filepath."
+    exit 1
+    fi
+
+    echo "Файл $filepath успешно создан с правами $permissions."
+
+}
+
+test_ping() {
+        # Запрашиваем у пользователя ресурс
+    read -p "Введите адрес ресурса для проверки (например, google.com): " resource
+
+    # Проверяем, что пользователь ввел что-то
+    if [ -z "$resource" ]; then
+        echo "Вы не ввели адрес ресурса. Завершение скрипта."
+        exit 1
+    fi
+
+    # Выполняем ping с отправкой 3 пакетов
+    echo "Проверяем доступность $resource..."
+    ping -c 3 "$resource"
+
+    # Завершение
+    echo "Проверка завершена."
+
+}
+
+PS3='Please enter your choice: '
+options=("Print user and OS info" "Home dir info" "Create dir" "Test ping" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Print user and OS info")
+            user_info
+            ;;
+        "Home dir info")
+            home_dir_info
+            ;;
+        "Create dir")
+            create_dir
+            ;;
+        "Test ping")
+            test_ping
+            ;;
+        "Quit")
+            break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
